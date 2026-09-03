@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class PeliculaController {
@@ -79,20 +80,32 @@ public class PeliculaController {
         return "upload";
     }
 
+    private static final List<String> EXTENSIONES_PERMITIDAS = List.of(".jpg", ".jpeg", ".png", ".webp");
+
     @PostMapping("/upload/{id}")
     public String uploadFile(@PathVariable Integer id,
-                             @RequestParam("afiche") MultipartFile archivo) throws IOException {
+                            @RequestParam("afiche") MultipartFile archivo) throws IOException {
         Pelicula pelicula = peliculaRepo.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Pelicula no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Pelicula no encontrada"));
 
-        String filename = archivo.getOriginalFilename();
+        String nombreOriginal = archivo.getOriginalFilename();
+        String extension = nombreOriginal != null && nombreOriginal.contains(".")
+                ? nombreOriginal.substring(nombreOriginal.lastIndexOf('.')).toLowerCase()
+                : "";
+
+        if (!EXTENSIONES_PERMITIDAS.contains(extension)) {
+            throw new IllegalArgumentException("Tipo de archivo no permitido");
+        }
+
+        String nombreSeguro = UUID.randomUUID() + extension;
+
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
-        Files.copy(archivo.getInputStream(), uploadPath.resolve(filename));
+        Files.copy(archivo.getInputStream(), uploadPath.resolve(nombreSeguro));
 
-        pelicula.setAfichePath(filename);
+        pelicula.setAfichePath(nombreSeguro);
         peliculaRepo.save(pelicula);
 
         return "redirect:/";
