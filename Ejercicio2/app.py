@@ -22,17 +22,20 @@ def close_db(exception):
 
 def buscar_funciones(query, sort_by='nombre', sort_dir='ASC'):
     db = get_db()
+
+    columna_orden = 'peliculas.nombre' if sort_by == 'nombre' else 'funciones.fecha_hora'
+    direccion = 'DESC' if sort_dir.upper() == 'DESC' else 'ASC'
+
     sql = (
         f"SELECT peliculas.nombre as pelicula, funciones.fecha_hora, "
         f"(funciones.asientos_totales - funciones.asientos_ocupados) as disponibles, "
         f"peliculas.descripcion as descripcion, peliculas.id as id "
         f"FROM funciones "
         f"JOIN peliculas ON funciones.pelicula_id = peliculas.id "
-        f"WHERE peliculas.nombre LIKE '%{query}%' "
-        f"ORDER BY {'peliculas.nombre' if sort_by == 'nombre' else 'funciones.fecha_hora'} "
-        f"{sort_dir}"
+        f"WHERE peliculas.nombre LIKE ? "
+        f"ORDER BY {columna_orden} {direccion}"
     )
-    return db.execute(sql).fetchall()
+    return db.execute(sql, (f'%{query}%',)).fetchall()
 
 
 @app.route('/')
