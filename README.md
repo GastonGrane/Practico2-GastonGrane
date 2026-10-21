@@ -474,3 +474,61 @@ Este único cambio resuelve las 2 vulnerabilidades a la vez. La clave hardcodead
 ![usuario2: hash distinto al de usuario1, pese a la misma contraseña](capturas/ej5-04-postfix-usuario2-hash-distinto.png)
 
 El prefijo `$2a$10$...` confirma que se está usando BCrypt (versión `2a`, costo `10`). Ya no hay ningún patrón detectable entre contraseñas iguales, y no existe ninguna clave capaz de revertir estos valores a texto plano.
+
+
+---
+
+## Cómo correr los tests (Práctico 4)
+
+> **Disclaimer:** Los tests fueron escritos y ejecutados por mí, en mi propia máquina virtual, para las dos ramas (`main` y `practico-2`). Conté con asistencia de una herramienta de IA para la ayuda en la estrucutra de los tests, resolver problemas de configuración (Maven, versiones de Java, Docker) y redactar esta sección.
+
+Agregué pruebas automatizadas para cada vulnerabilidad del Práctico 2, que confirman que la mitigación sigue funcionando (y que fallarían si alguien reintrodujera el bug sin querer). Tienen que fallar en `main` y pasar acá en `practico-2`.
+
+### Ejercicio 1 - SQLi (Pytest)
+
+```bash
+cd Ejercicio1
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+### Ejercicio 2 - XSS (Pytest)
+
+```bash
+cd Ejercicio2
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+### Ejercicio 3 - File Upload (prueba de integración, necesita Docker levantado)
+
+```bash
+cd Ejercicio3
+docker-compose up --build -d
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+### Ejercicio 4 - SSTI (prueba de integración, necesita Docker levantado)
+
+```bash
+cd Ejercicio4
+docker-compose up --build -d
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+### Ejercicio 5 - Almacenamiento inseguro (JUnit)
+
+```bash
+cd Ejercicio5
+mvn test
+```
